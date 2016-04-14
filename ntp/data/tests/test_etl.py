@@ -1,4 +1,3 @@
-from ntp.data.etl import return_sanitized, filter_grouped, group_all, format_for_insert
 from ntp.data.api import retrieve_data
 from pprint import pprint
 from time import sleep
@@ -46,4 +45,5 @@ def test_format_for_insert():
             for datum in doc[key]:
                 for key in ["data", "title"]:
                     assert key in datum
+
     return formatted                    
