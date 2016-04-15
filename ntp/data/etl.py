@@ -124,12 +124,22 @@ def format_for_insert(sanitized_data):
         json_like = [{key_name: elem[0], value_name: [list(tupl) for tupl in elem[1].items()]} for elem in dictionary.items()]
         return json_like
         
+    def blatant_hack(json_like):
+        """
+        God forgive this module
+        """
+        for doc in json_like:
+            doc["type"] = "pie"
+        return json_like            
+
     def valmap_if(dictionary, key_name, value_name):
         """
         Apply to_json_like to values within the data that are lists. 
         """
         return {
-            key: to_json_like(dictionary[key], key_name, value_name) if isinstance(dictionary[key], dict) else dictionary[key] 
+            key: blatant_hack(
+                to_json_like(dictionary[key], key_name, value_name)
+                ) if isinstance(dictionary[key], dict) else dictionary[key] 
             for key in dictionary
         }
 
