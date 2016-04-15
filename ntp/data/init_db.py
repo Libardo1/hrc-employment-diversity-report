@@ -84,7 +84,10 @@ db_name = "hrc"
 timestamps = "timestamps"
 static = "static"
 temporal = "temporal"
-indexes = [dict(table=static, index="date")]
+indexes = [
+    dict(table=static, index="date"),
+    dict(table=static, index="name")
+    ]
 db = r.db(db_name)
 rdb_static = db.table(static)
 rdb_temporal = db.table(temporal)

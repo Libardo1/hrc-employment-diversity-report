@@ -1,37 +1,60 @@
-from app import app
-from flask import request, jsonify
-from include.functions import rdb_get_data_by_department, rdb_get_department_names#, rdb_get_temporal_values
-from data.include.sanitize.vars import NAME
+from data.init_db import rdb_static, r
+from flask import jsonify
 
-@app.route('/api/data', methods=["GET", "POST"])
-def data():
 
+def get_by_department(department, key_index):
+    """
+    Grab all data for each department from table.
+    """
+
+    output = [
+       elem for elem in
+        rdb_static
+        .get_all(
+            department,
+            index=key_index
+        ).run(r.connect())
+    ]
+
+    return output[0]
+
+
+def get_department_names(department_key):
+    """
+    Return all department names for user selection.
+    """
+
+    output = [
+        elem for elem in
+        rdb_static
+        .map(
+            lambda row: row[department_key]
+        )
+        .distinct()
+        .run(r.connect())
+    ]
+
+    return output
+
+
+def get_demographic_data(request):
     if request.method == "POST":
         request_params = request.json.keys()
-        if "attribute" not in request_params or NAME not in request_params:
 
-            return jsonify({"error": "Required key not found", "keys_found": request.json.keys()})
+        if "attribute" not in request_params or "name" not in request_params:
+
+            return jsonify(
+                {"error": "Required key not found", "keys_found": request.json.keys()})
 
         attribute = request.json["attribute"]
-        output = rdb_get_data_by_department(
-            request.json[NAME],
-            NAME
+        output = get_by_department(
+            request.json["name"],
+           "name" 
         )
         response = output[attribute]
         return jsonify({"attribute": response})
 
     if request.method == "GET":
         return jsonify({"status": "good"})
-
-@app.route('/api/departments', methods=["GET"])
-def departments():
-    response = sorted(rdb_get_department_names(NAME))
-    return jsonify({"departments": response})
-
-
-# @app.route('/api/temporal', methods=["GET"])
-# def temporal():
-#     response = rdb_get_temporal_values()
-#     return jsonify({"temporal": response})
 
 
