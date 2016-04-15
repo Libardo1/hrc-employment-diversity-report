@@ -16,6 +16,7 @@ def should_update(ntp_last_updated, odp_last_updated):
     """
     Check rethinkdb for a record of imported datasets.
     """
+    
     if int(odp_last_updated) > int(ntp_last_updated):
         return True 
     return False 
@@ -52,7 +53,7 @@ def ntp_last_update():
     last_updated = [elem for elem in rdb_timestamps.run(r.connect())]
 
     if last_updated:
-        return sorted(last_updated, key=lambda k: k.get("id"), reverse=True)
+        return sorted(last_updated, key=lambda k: k.get("id"), reverse=True).pop().get("id")
 
     # Zero is the initial condition, i.e., no timestamps inserted
     return 0
