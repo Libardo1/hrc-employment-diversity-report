@@ -1,6 +1,6 @@
 import time
 from pprint import pprint
-from ntp.data.init_db import rdb_timestamps, r
+from ntp.data.init_db import rdb_timestamps, r, rdb_static
 from ntp.data import etl, api
 
 
@@ -12,7 +12,7 @@ def create_timestamps(new_timestamp):
     return True
 
 
-def main(ntp_last_updated):
+def retrieve_data_for_insert(ntp_last_updated):
     """
     Handles all required data manipulations for importing open data portal data
 
@@ -35,9 +35,39 @@ def main(ntp_last_updated):
         
         # Actual data transformations needed for front end
         static_data = etl.prepare_static_data(sanitized_data)
+
+        for out in static_data:
+            out["date"] = ntp_last_updated
+
         temporal_data = etl.prepare_temporal_data(sanitized_data)
         out_bool = create_timestamps(ntp_last_updated) 
         assert out_bool
         return dict(static=static_data, temporal=temporal_data)
 
     return False
+
+
+def run():
+    """
+    Primary entry point for data.main
+    """
+   
+    last_updated = api.ntp_last_update() 
+
+    pprint("Checking for new data...")  
+    out = retrieve_data_for_insert(last_updated)
+
+    if out:
+        pprint("New data found")
+        static = out.get("static")
+        temporal = out.get("temporal")
+
+        if static:
+            pprint("Inserting static data")
+            rdb_static.insert(static).run(r.connect())
+            
+    else:
+        pprint("Up-to-date")
+
+if __name__ == "__main__":
+    run()
