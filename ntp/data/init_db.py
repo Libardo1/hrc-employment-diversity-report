@@ -84,7 +84,7 @@ db_name = "hrc"
 timestamps = "timestamps"
 static = "static"
 temporal = "temporal"
-
+indexes = [dict(table=static, index="date")]
 db = r.db(db_name)
 rdb_static = db.table(static)
 rdb_temporal = db.table(temporal)
@@ -93,5 +93,6 @@ rdb_timestamps = db.table(timestamps)
 init_db = RethinkValidator(server=config.RETHINK_HOST, port=config.RETHINK_PORT)
 init_db.validate_databases(db_name)
 init_db.validate_tables(db_name, [static, temporal, timestamps])
+init_db.validate_indexes(indexes)
 
 
